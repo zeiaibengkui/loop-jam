@@ -1,0 +1,138 @@
+const { createApp, reactive } = Vue
+
+function buildVue() {
+    createApp({
+        setup() {
+            return {
+                player,
+                REWARD_RARITIES,
+                ACHIEVEMENTS,
+                TOTAL_ACHIEVEMENTS,
+                ACH_ORDER,
+                Operator,
+                chooseInventorySlot,
+                equalAll,
+                chooseReward,
+                format,
+                actionPopup,
+                test,
+            }
+        },
+    })
+    
+    .component('o-slot',{
+        props: {
+            data: {
+                type: Object,
+                default: () => ({ slot: {} })
+            },
+            depth: {
+                type: Number,
+                default: 0,
+            },
+        },
+        computed: {
+            objClass() {
+                const d = this.data;
+                return {
+                    choosed: !d.locked && player.choosed_slot !== null && !(player.choosed_slot instanceof Operator && player.choosed_slot.type === 20) && (d.allowed === 0 || d.allowed & player.choosed_slot.sType)
+                }
+            },
+            objStyle() {
+                return {
+                    '--primary-color': ['#888','#fff'][this.getDepth%2]
+                }
+            },
+            getDepth() {
+                if (this.depth >= 16) unlockAchievement(10);
+                return this.depth
+            },
+        },
+        methods: {
+            action(event) {
+                if (event) event.stopPropagation();
+
+                const d = this.data;
+
+                if (player.tutorials === 2 || player.tutorials === 4 && d.slot || player.tutorials === 5) return;
+
+                if (player.choosed_slot === null) {
+                    if (d.slot && !d.locked) {
+                        splitCode(d.slot);
+                        d.slot = null;
+                    }
+                } else if (player.slots.get(player.choosed_slot) > 0 && !d.locked && !(player.choosed_slot instanceof Operator && player.choosed_slot.type === 20) && (d.allowed === 0 || d.allowed & player.choosed_slot.sType)) {
+                    increaseSlot(player.choosed_slot,-1)
+
+                    if (d.slot) splitCode(d.slot);
+
+                    d.slot = _.cloneDeep(player.choosed_slot);
+
+                    if (player.slots.get(player.choosed_slot) === 0) player.choosed_slot = null;
+                }
+
+                if (player.tutorials === 4) {
+                    player.choosed_slot = null
+                    message(`PERFECT! You can try to run the code (aka loop), pressing the "Play" button.`,2)
+                    player.tutorials++
+                }
+            },
+        },
+        template: `<div class='o-slot' :class="objClass" :style="objStyle" @click="action">
+            <component v-if="data.slot && data.slot.component" :is="data.slot.component" :data="data.slot" :depth="depth+1" />
+        </div>`,
+    })
+    .component('variable',{
+        props: ['data'],
+        template: `<div>{{ data.id }}</div>`,
+    })
+    .component('constant',{
+        props: ['data'],
+        template: `<div>{{ data.value }}</div>`,
+    })
+    .component('operator',{
+        inject: ['OperatorHTMLs'],
+        props: {
+            data: Object,
+            index: {
+                type: Number,
+                default: -1,
+            },
+            depth: {
+                type: Number,
+                default: 0,
+            },
+        },
+        computed: {
+            objectStyle() {
+                const i = this.index;
+                if (i < 0) return {};
+                let depth = 0
+                for (let j = 1; j <= i; j++) {
+                    if (player.code[j-1].type === 20) depth++;
+                    if (player.code[j].type === 21) depth--
+                }
+                return {
+                    'margin-left': 25 * depth + "px",
+                }
+            },
+        },
+        template: `<div class='o-operator' :style="objectStyle">
+            <div v-if="data.slots.length === 0 && OperatorHTMLs[data.type][0]" v-html="OperatorHTMLs[data.type][0]"></div>
+            <div v-for="x in data.slots.length">
+                <div v-if="OperatorHTMLs[data.type][x-1]" v-html="OperatorHTMLs[data.type][x-1]"></div>
+                <o-slot :data="data.slots[x-1]" :depth="depth" />
+                <div v-if="x === data.slots.length && OperatorHTMLs[data.type][x]" v-html="OperatorHTMLs[data.type][x]"></div>
+            </div>
+        </div>`,
+    })
+
+    .provide('player',player)
+
+    .provide('OperatorHTMLs',OperatorHTMLs)
+    .provide('Operator',Operator)
+    .provide('Variable',Variable)
+    .provide('Constant',Constant)
+    
+    .mount('#app')
+}

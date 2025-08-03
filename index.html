@@ -1,0 +1,126 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <audio id="type-sound" src="./type-sound.wav" preload="auto"></audio>
+
+    <title>Document</title>
+
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+    <script src="javascripts/modules/lodash.js"></script>
+    <script src="javascripts/modules/break_eternity.js"></script>
+
+    <script src="javascripts/modules/vue.global.js"></script>
+    <script src="javascripts/vue.js"></script>
+
+    <script src="javascripts/modules/operators.js"></script>
+    <script src="javascripts/modules/achievements.js"></script>
+    
+    <script src="javascripts/rewards.js"></script>
+    <script src="javascripts/main.js"></script>
+</head>
+<body onload="GameLoad()">
+    <div id="app" style="display: none;">
+        <div class="o-source" :class="{running: player.playing}" :style="{'pointer-events': player.popup.enabled || player.completed ? 'none' : 'all'}">
+            <div class="o-topbar">
+                <button class="o-play-button" :class="{running: player.running}" onclick="runCode()"><span v-if="player.running">Fast</span><span v-else>Play</span></button>
+                <!-- <button>Run</button> P = {{ player.variables.P }} / {{ player.nextP }} -->
+                <div class="o-progress-bar">
+                    <div class="o-bar" :style="{width: player.variables.P.div(player.nextP).min(1) * 100 + '%'}"></div>
+                    <div class="o-progress-percent">P = <span v-html="format(player.variables.P)"></span> / <span v-html="format(player.nextP)"></span></div>
+                </div>
+                <button class="o-mute-button" :class="{muted: player.mute}" onclick="player.mute = !player.mute"></button>
+                <button class="o-give-up-button" onclick="giveUp()">Give up?</button>
+            </div><div class="o-code" :class="{choosed: !player.running && player.choosed_slot instanceof Operator && (player.choosed_slot.type < 10 || player.choosed_slot.type === 20)}">
+                <div v-for="(o,k) in player.code">
+                    <operator :data="o" :index="k" class="o-code-operator" ></operator>
+                    <div class="o-code-line">{{ k+1 }}</div>
+
+                    <div class="o-code-insert" @click="Operator.insertCode(k,player.choosed_slot)">+</div>
+                    <!-- <div class="o-code-insert-last" v-if="k+1 === player.code.length" @click="Operator.insertCode(k+1,player.choosed_slot)">+</div> -->
+
+                    <div class="o-code-remove" v-if="!player.running && !o.persist" @click="Operator.clearCode(k)">-</div>
+                </div>
+            </div><div class="o-slots">
+                <div v-for="[s, k] in player.slots" class="o-slot-div" :class="{choosed: equalAll(s,player.choosed_slot)}" @click="chooseInventorySlot(s)">
+                    <div class="o-slot-amount">x{{ k }}</div>
+                    <div class="o-display-slot">
+                        <o-slot :data="{slot: s}" ></o-slot>
+                    </div>
+                    <div class="o-slot-description" v-html="s.description"></div>
+                </div>
+            </div><div class="o-information">
+                <div class="o-variables" v-if="player.running">
+                    <div v-for="n in 'abcdef'"><span v-if="player.new_variables.has(n)">{{ n }} = <span v-html='format(player.variables[n] ?? 0)'></span></span></div>
+                </div><div v-else v-html="player.msg"></div>
+                <img id="face" src="./textures/face0.png">
+            </div>
+        </div>
+
+        <div class="o-main-menu" :class="{running: player.playing}" :style="{'pointer-events': player.popup.enabled || player.completed ? 'none' : 'all'}">
+            <div class="o-title">
+                <div>2<sup>1024</sup> Loops</div>
+                <div style="font-size: 2vmin;">Made by MrRedShark77 in GMTK 2025</div>
+            </div>
+            <div class="o-menu-buttons">
+                <button class="o-mute-button" :class="{muted: player.mute}" onclick="player.mute = !player.mute"></button>
+                <button class="o-start-button" onclick="startGame()"></button>
+                <button class="o-achievement-button" onclick="createComponentPopup('achievements')"></button>
+            </div>
+            <button class="o-tutorial-button" onclick="player.tutorial = !player.tutorial">Tutorial <b v-if="player.tutorial" style="color: green;">ENABLED</b><b v-else style="color: red;">DISABLED</b></button>
+        </div>
+
+        <div class="o-popups" v-if="player.popup.enabled || player.completed">
+            <div v-if="player.completed">
+                Choose 3 of rewards!
+                <div><b>Common 75%</b> | <b>Uncommon 18.7%</b> | <b>Rare 5.3%</b> | <b>Epic 0.67%</b> | <b>Legendary 0.33%</b></div>
+                <div class="o-rewards-grid">
+                    <div v-for="([s, k, r], i) in player.rewards" class="o-slot-div" :class="{choosed: player.choosedRewards.has(i)}" :style="{'--primary-color': REWARD_RARITIES[r][1]}" @click="chooseReward(i)">
+                        <div class="o-slot-amount">{{ REWARD_RARITIES[r][0] }} x{{ k }}</div>
+                        <div class="o-display-slot">
+                            <o-slot :data="{slot: s}" ></o-slot>
+                        </div>
+                        <div class="o-slot-description" v-html="s.description"></div>
+                    </div>
+                </div>
+                <i style="font-size: 12px;">If you choose a variable that never existed before, it will give some operator and random constant.</i>
+                <div>
+                    <button onclick="claimRewards()">Claim the choosed rewards (or skip)</button>
+                    <button :class="{locked: player.reroll <= 0}" onclick="rerollRewards()">Reroll ({{ player.reroll }})</button>
+                </div>
+            </div><div v-else>
+                <div v-if="player.popup.component">
+                    <div v-if="player.popup.component === 'achievements'">
+                        You have unlocked {{ player.achievements.reduce((a,b) => a + b, 0) }} / {{ TOTAL_ACHIEVEMENTS }} achievements
+                        <div class="o-achievements">
+                            <div v-for="[i,a] in ACH_ORDER.map(x => [x,ACHIEVEMENTS[x]])" class="o-achievement-div" :class="{[['','unlocked','golden','platinum'][player.achievements[i]]]: true}" @click="test(i)">
+                                <img :src="!a.type || player.achievements[i] ? `textures/achievement${i}.png` : `textures/achievement_hidden.png`">
+                                <div class="o-achievement-title" v-html="!a.type || player.achievements[i] ? a.title : '???'"></div>
+                                <div class="o-achievement-description" v-html="a.description[Math.max(player.achievements[i]-1+a.type,0)]"></div>
+                            </div>
+                        </div>
+                    </div><div v-if="player.popup.component === 'tutorial'">
+                        <div>Congratulations! You passed the tutorials, so you can build the code and improve it better. Also, here's an additional tutorial:</div>
+                        <img src="textures/help.png">
+                        <div><i>If line is long enough (or exceed code's width), you must Shift+Scroll to scroll horizontally, or, as mobile users, swipe left or right!</i></div>
+                        <div>Remember, you did complete the goal, so you can choose 3 of 6 rewards generated depending on chance! Don't worry, closing this popup will let you see rewards! Good luck with reaching P = 2<sup>1024</sup> (1.798x10<sup>308</sup>) and achieving goals!</div>
+                    </div>
+                </div><div v-else v-html="player.popup.msg"></div>
+                <div style="margin-top: 10px;"><button v-for="([b],i) in player.popup.buttons" v-html="b" @click="actionPopup(i)"></button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="achievement-popups">
+        <!--
+        <div class="o-achievement-div">
+            <img src="textures/achievement0.png">
+            <div class="o-achievement-title">Achievement Unlocked: Thanks for Playing!</div>
+            <div class="o-achievement-description">Placeholder</div>
+        </div>
+        -->
+    </div>
+</body>
+</html>
