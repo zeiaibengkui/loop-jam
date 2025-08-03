@@ -92,7 +92,9 @@ function claimRewards(norandom = false) {
     }
     */
 
-    if (new Set(['a','b','c','d','e','f']).intersection(player.new_variables).size >= 6) unlockAchievement(3);
+    try {
+        if (new Set(['a','b','c','d','e','f']).intersection(player.new_variables).size >= 6) unlockAchievement(3);
+    } catch {};
 
     player.choosedRewards.clear()
     player.rewards = []

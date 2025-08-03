@@ -3,6 +3,7 @@ const getPlayerData = function () {
         msg: "Hello, World!",
 
         playing: false,
+        storing: false,
         running: false,
 
         variables: {
@@ -20,7 +21,9 @@ const getPlayerData = function () {
 
             // [new Operator(20, new Slot(4, new Constant(3), true)),3]
         ]),
+        stored: [],
         choosed_slot: null,
+        choosed_store: null,
 
         code: [
             new Operator(OperatorType.AddVariable, new Slot(0, new Variable('P'), true)),
@@ -81,6 +84,8 @@ const GameLoad = function () {
 
 function startGame() {
     player.playing = true;
+    player.stored = [];
+    player.storing = false;
     player.variables = {
         P: D(0),
     }
@@ -89,11 +94,14 @@ function startGame() {
     player.slots = new Map([
         [new Operator(OperatorType.SetVariable, new Slot(2, new Variable('a'), true), new Slot(0, new Constant(1), true)), 1],
         [new Variable('a'), 3],
+
+        
         
         /*
         [new Operator(OperatorType.Exponent, null, new Slot(0, new Operator(OperatorType.Logarithm, new Slot(0, new Operator(OperatorType.Logarithm), true)), true)), 1]
         [new Operator(10), 128],
         [new Operator(0), 20],
+        [new Operator(20, new Slot(4, new Constant(3), true)),3]
         [new Variable('f'), 10],
         [new Variable('c'), 10],
         [new Variable('b'), 10],
@@ -101,6 +109,7 @@ function startGame() {
         */
     ])
     player.choosed_slot = null;
+    player.choosed_store = null;
     player.code = [
         new Operator(OperatorType.AddVariable, new Slot(0, new Variable('P'), true)),
     ]
@@ -175,7 +184,7 @@ function splitCode(c, override=true) {
             player.tutorials = 0;
             player.tutorial = false;
 
-            createComponentPopup("tutorial",[["Thanks!",()=>finish()]])
+            createComponentPopup("tutorial1",[["Next",()=>createComponentPopup("tutorial2",[["Thanks!",()=>finish()]])]])
         } else if (player.variables.P.gte(player.nextP)) {
             spam = 0
 
@@ -284,6 +293,8 @@ function splitCode(c, override=true) {
         message(``,0)
 
         player.choosed_slot = null;
+        player.choosed_store = null;
+        player.storing = false;
         player.running = true;
         player.loops++;
 
@@ -394,9 +405,9 @@ function createComponentPopup(component, buttons = [["Ok"]]) {
     player.popup.buttons = buttons;
 }
 function actionPopup(i) {
-    player.popup.buttons[i][1]?.();
     player.popup.enabled = false;
     player.popup.component = null;
+    player.popup.buttons[i][1]?.();
 }
 
 function giveUp() {
@@ -406,7 +417,7 @@ function giveUp() {
             player.playing = false;
         }],
         [`No`, () => {
-            if (player.variables.P >= Number.MAX_VALUE ** .75) unlockAchievement(14);
+            if (!player.endless && player.variables.P >= Number.MAX_VALUE ** .75) unlockAchievement(14);
         }],
     ])
 }

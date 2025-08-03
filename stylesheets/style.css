@@ -69,6 +69,7 @@ h1,h2,h3,h4 {
     margin: 0px;
 }
 
+/*
 *::-webkit-scrollbar-track
 {
     -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
@@ -88,6 +89,7 @@ h1,h2,h3,h4 {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
     background-color: #888;
 }
+*/
 
 .o-slot {
     min-width: 30px;
@@ -327,7 +329,7 @@ button:not(.locked, :active):hover {
 
     padding: 2px !important;
     display: grid;
-    grid-template-columns: 90px 1fr 46px 90px;
+    grid-template-columns: 90px 120px 1fr 46px 90px;
     gap: 2px;
 }
 .o-topbar button {
@@ -354,6 +356,27 @@ button:not(.locked, :active):hover {
 .o-play-button.running {
     --primary-color: cyan;
 }
+
+.o-store-button {
+    position: relative;
+    --primary-color: white;
+    padding-left: 30px;
+}
+.o-store-button::after {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    transform: translateY(-50%);
+    background-image: url(../textures/store.png);
+    background-size: contain;
+    content: "";
+}
+.o-store-button.storing {
+    --primary-color: cyan;
+}
+
 .o-give-up-button {
     --primary-color: coral;
 }

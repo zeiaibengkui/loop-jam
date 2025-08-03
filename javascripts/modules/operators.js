@@ -213,6 +213,18 @@ class Operator {
         return true;
     }
 
+    isEmpty() {
+        for (let i = 0; i < this.slots.length; i++) {
+            const s = this.slots[i];
+
+            if (!s.locked && s.slot) return false;
+
+            if (s.slot instanceof Operator && !s.slot.isEmpty()) return false;
+        }
+
+        return true
+    }
+
     static clearCode(index) {
         if (player.tutorials || player.running) return;
 
@@ -222,7 +234,12 @@ class Operator {
 
         const T = c.type === OperatorType.Repeat
 
-        splitCode(c)
+        if (!T && player.storing && !c.isEmpty()) {
+            storeNode(_.cloneDeep(c))
+            player.storing = false
+        }
+        else splitCode(c)
+
         player.code.splice(index,1)
 
         if (T) {
@@ -246,7 +263,12 @@ class Operator {
             player.tutorials++
         }
 
-        increaseSlot(code,-1)
+        if (player.choosed_store !== null) {
+            player.stored.splice(player.choosed_store, 1);
+            player.choosed_store = null
+        }
+        else increaseSlot(code,-1)
+
         player.code.splice(index,0,_.cloneDeep(code))
 
         if (code.type === OperatorType.Repeat) {
@@ -260,17 +282,58 @@ class Operator {
         ACHIEVEMENT_CONDITIONS.G5 = false;
         if (player.code.length >= 32) unlockAchievement(11);
     }
+    static checkInsert() {
+        const choosed = player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null
+        return !player.running && choosed instanceof Operator && (choosed.type < 10 || choosed.type === 20)
+    }
 }
 
 const CustomOperatorDescriptions = new Map([
-    [new Operator(OperatorType.Exponent, null, new Slot(0, new Constant(2), true)), `Calculate the square of a variable, number, or operator.`],
-    [new Operator(OperatorType.Exponent, null, new Slot(0, new Constant(3), true)), `Calculate the cube of a variable, number, or operator.`],
+    [new Operator(OperatorType.Exponent, null, new Slot(0, new Constant(2), true)), `Calculates the square of a variable, number, or operator.`],
+    [new Operator(OperatorType.Exponent, null, new Slot(0, new Constant(3), true)), `Calculates the cube of a variable, number, or operator.`],
     [new Operator(OperatorType.Exponent, null, new Slot(0, new Operator(OperatorType.Logarithm, new Slot(0, new Operator(OperatorType.Logarithm), true)), true)), `${OperatorDescriptions[OperatorType.Exponent]} The exponent equals to natural logarithm of a variable, number, or operator. <i>[ln(ln(5+1)+1) > 1]</i>`],
 ])
 function findDescription(c) {
     for (const [o,d] of CustomOperatorDescriptions) if (equalAll(c,o)) return d;
     
     return null
+}
+
+function switchStore() {
+    if (player.tutorial || player.running || player.completed) return true;
+
+    player.storing = !player.storing;
+    player.choosed_slot = null;
+}
+
+class Store {
+    constructor (node, base) {
+        this.node = node;
+        this.base = base;
+    }
+}
+
+function storeNode(c) {
+    const s = _.cloneDeep(c)
+
+    const k = x => {
+        if (x instanceof Operator) for (let i = 0; i < x.slots.length; i++) {
+            const ss = x.slots[i]
+            if (ss.locked) k(ss.slot);
+            else if (ss.slot) ss.slot = new Variable("??");
+        };
+    }
+
+    k(s)
+
+    player.stored.push(new Store(c, s))
+}
+
+function chooseStoredSlot(i) {
+    if (player.running) return;
+
+    player.choosed_store = player.choosed_store === i ? null : i;
+    player.choosed_slot = null;
 }
 
 function chooseInventorySlot(s) {
@@ -287,6 +350,9 @@ function chooseInventorySlot(s) {
         message(`Then place the empty slot in the operator in the last line of the code.`,2)
         player.tutorials++
     }
+
+    player.storing = false;
+    player.choosed_store = null;
 
     if (player.choosed_slot && equalAll(player.choosed_slot, s)) player.choosed_slot = null
     else {

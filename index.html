@@ -26,6 +26,7 @@
         <div class="o-source" :class="{running: player.playing}" :style="{'pointer-events': player.popup.enabled || player.completed ? 'none' : 'all'}">
             <div class="o-topbar">
                 <button class="o-play-button" :class="{running: player.running}" onclick="runCode()"><span v-if="player.running">Fast</span><span v-else>Play</span></button>
+                <button class="o-store-button" :class="{storing: player.storing}" onclick="switchStore()"><span v-if="player.storing">Storing</span><span v-else>Store</span></button>
                 <!-- <button>Run</button> P = {{ player.variables.P }} / {{ player.nextP }} -->
                 <div class="o-progress-bar">
                     <div class="o-bar" :style="{width: player.variables.P.div(player.nextP).min(1) * 100 + '%'}"></div>
@@ -33,12 +34,12 @@
                 </div>
                 <button class="o-mute-button" :class="{muted: player.mute}" onclick="player.mute = !player.mute"></button>
                 <button class="o-give-up-button" onclick="giveUp()">Give up?</button>
-            </div><div class="o-code" :class="{choosed: !player.running && player.choosed_slot instanceof Operator && (player.choosed_slot.type < 10 || player.choosed_slot.type === 20)}">
+            </div><div class="o-code" :class="{choosed: Operator.checkInsert()}">
                 <div v-for="(o,k) in player.code">
                     <operator :data="o" :index="k" class="o-code-operator" ></operator>
                     <div class="o-code-line">{{ k+1 }}</div>
 
-                    <div class="o-code-insert" @click="Operator.insertCode(k,player.choosed_slot)">+</div>
+                    <div class="o-code-insert" @click="Operator.insertCode(k,player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null)">+</div>
                     <!-- <div class="o-code-insert-last" v-if="k+1 === player.code.length" @click="Operator.insertCode(k+1,player.choosed_slot)">+</div> -->
 
                     <div class="o-code-remove" v-if="!player.running && !o.persist" @click="Operator.clearCode(k)">-</div>
@@ -50,6 +51,12 @@
                         <o-slot :data="{slot: s}" ></o-slot>
                     </div>
                     <div class="o-slot-description" v-html="s.description"></div>
+                </div><div v-for="(s, i) in player.stored" class="o-slot-div" :class="{choosed: player.choosed_store === i}" @click="chooseStoredSlot(i)">
+                    <div class="o-slot-amount">Stored</div>
+                    <div class="o-display-slot">
+                        <o-slot :data="{slot: s.base}" ></o-slot>
+                    </div>
+                    <div class="o-slot-description">The stored operator.</div>
                 </div>
             </div><div class="o-information">
                 <div class="o-variables" v-if="player.running">
@@ -101,10 +108,13 @@
                                 <div class="o-achievement-description" v-html="a.description[Math.max(player.achievements[i]-1+a.type,0)]"></div>
                             </div>
                         </div>
-                    </div><div v-if="player.popup.component === 'tutorial'">
+                    </div><div v-if="player.popup.component === 'tutorial1'">
                         <div>Congratulations! You passed the tutorials, so you can build the code and improve it better. Also, here's an additional tutorial:</div>
                         <img src="textures/help.png">
                         <div><i>If line is long enough (or exceed code's width), you must Shift+Scroll to scroll horizontally, or, as mobile users, swipe left or right!</i></div>
+                    </div><div v-if="player.popup.component === 'tutorial2'">
+                        This is "Store" button which switches Store Mode where you can choose unempty operators to store! <i>This is a WIP button. Use at own risk...</i>
+                        <img src="textures/help2.png">
                         <div>Remember, you did complete the goal, so you can choose 3 of 6 rewards generated depending on chance! Don't worry, closing this popup will let you see rewards! Good luck with reaching P = 2<sup>1024</sup> (1.798x10<sup>308</sup>) and achieving goals!</div>
                     </div>
                 </div><div v-else v-html="player.popup.msg"></div>

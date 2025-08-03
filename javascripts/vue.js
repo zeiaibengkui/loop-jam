@@ -11,6 +11,7 @@ function buildVue() {
                 ACH_ORDER,
                 Operator,
                 chooseInventorySlot,
+                chooseStoredSlot,
                 equalAll,
                 chooseReward,
                 format,
@@ -34,8 +35,9 @@ function buildVue() {
         computed: {
             objClass() {
                 const d = this.data;
+                const choosed = player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null
                 return {
-                    choosed: !d.locked && player.choosed_slot !== null && !(player.choosed_slot instanceof Operator && player.choosed_slot.type === 20) && (d.allowed === 0 || d.allowed & player.choosed_slot.sType)
+                    choosed: !d.locked && (player.storing && d.slot || choosed !== null && !(choosed instanceof Operator && choosed.type === 20)) && (player.storing || d.allowed === 0 || d.allowed & choosed.sType)
                 }
             },
             objStyle() {
@@ -56,17 +58,31 @@ function buildVue() {
 
                 if (player.tutorials === 2 || player.tutorials === 4 && d.slot || player.tutorials === 5) return;
 
-                if (player.choosed_slot === null) {
+                const choosed = player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null
+
+                const condition = !d.locked && (d.allowed === 0 || d.allowed & choosed.sType)
+
+                if (player.storing && !(d.slot instanceof Variable || d.slot instanceof Constant) && !(d.slot instanceof Operator && d.slot.isEmpty())) {
+                    if (d.slot && condition) {
+                        storeNode(_.cloneDeep(d.slot))
+                        d.slot = null;
+
+                        player.storing = false;
+                    }
+                } else if (choosed === null) {
                     if (d.slot && !d.locked) {
                         splitCode(d.slot);
                         d.slot = null;
                     }
-                } else if (player.slots.get(player.choosed_slot) > 0 && !d.locked && !(player.choosed_slot instanceof Operator && player.choosed_slot.type === 20) && (d.allowed === 0 || d.allowed & player.choosed_slot.sType)) {
-                    increaseSlot(player.choosed_slot,-1)
+                } else if ((player.slots.get(choosed) > 0 || player.choosed_store !== null) && condition && !(choosed instanceof Operator && choosed.type === 20)) {
+                    if (player.choosed_store !== null) {
+                        player.stored.splice(player.choosed_store, 1);
+                        player.choosed_store = null
+                    } else increaseSlot(choosed,-1)
 
                     if (d.slot) splitCode(d.slot);
 
-                    d.slot = _.cloneDeep(player.choosed_slot);
+                    d.slot = _.cloneDeep(choosed);
 
                     if (player.slots.get(player.choosed_slot) === 0) player.choosed_slot = null;
                 }
