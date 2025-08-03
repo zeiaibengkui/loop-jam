@@ -168,6 +168,7 @@ function splitCode(c, override=true) {
 
     function finish() {
         if (step?.length >= 100) unlockAchievement(15);
+        if (player.variables.P.gte(Decimal.pow(2,Number.MAX_VALUE))) unlockAchievement(1,2);
         player.running = false;
 
         if (player.tutorials === 5) {
