@@ -104,15 +104,15 @@ h1,h2,h3,h4 {
     font-size: 20px;
 }
 
-.o-slot.choosed:not(.o-display-slot .o-slot),
-.o-slot-div.choosed:not(.o-rewards-grid .o-slot-div) {
+.o-slot.chose:not(.o-display-slot .o-slot),
+.o-slot-div.chose:not(.o-rewards-grid .o-slot-div) {
     background: color-mix(in srgb, var(--primary-color) 70%, green 30%);
     cursor: pointer;
 }
-.o-slot:not(.choosed) {
+.o-slot:not(.chose) {
     cursor: default;
 }
-.o-rewards-grid .o-slot-div.choosed::after {
+.o-rewards-grid .o-slot-div.chose::after {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -191,8 +191,8 @@ h1,h2,h3,h4 {
 }
 */
 
-.o-code-insert:not(.choosed .o-code-insert),
-.o-code-insert-last:not(.choosed .o-code-insert-last) {
+.o-code-insert:not(.chose .o-code-insert),
+.o-code-insert-last:not(.chose .o-code-insert-last) {
     display: none;
 }
 .o-code-insert {

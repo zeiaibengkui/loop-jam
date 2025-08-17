@@ -34,24 +34,24 @@
                 </div>
                 <button class="o-mute-button" :class="{muted: player.mute}" onclick="player.mute = !player.mute"></button>
                 <button class="o-give-up-button" onclick="giveUp()">Give up?</button>
-            </div><div class="o-code" :class="{choosed: Operator.checkInsert()}">
+            </div><div class="o-code" :class="{chose: Operator.checkInsert()}">
                 <div v-for="(o,k) in player.code">
                     <operator :data="o" :index="k" class="o-code-operator" ></operator>
                     <div class="o-code-line">{{ k+1 }}</div>
 
-                    <div class="o-code-insert" @click="Operator.insertCode(k,player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null)">+</div>
-                    <!-- <div class="o-code-insert-last" v-if="k+1 === player.code.length" @click="Operator.insertCode(k+1,player.choosed_slot)">+</div> -->
+                    <div class="o-code-insert" @click="Operator.insertCode(k,player.chose_slot ?? player.stored[player.chose_store]?.node ?? null)">+</div>
+                    <!-- <div class="o-code-insert-last" v-if="k+1 === player.code.length" @click="Operator.insertCode(k+1,player.chose_slot)">+</div> -->
 
                     <div class="o-code-remove" v-if="!player.running && !o.persist" @click="Operator.clearCode(k)">-</div>
                 </div>
             </div><div class="o-slots">
-                <div v-for="[s, k] in player.slots" class="o-slot-div" :class="{choosed: equalAll(s,player.choosed_slot)}" @click="chooseInventorySlot(s)">
+                <div v-for="[s, k] in player.slots" class="o-slot-div" :class="{chose: equalAll(s,player.chose_slot)}" @click="chooseInventorySlot(s)">
                     <div class="o-slot-amount">x{{ k }}</div>
                     <div class="o-display-slot">
                         <o-slot :data="{slot: s}" ></o-slot>
                     </div>
                     <div class="o-slot-description" v-html="s.description"></div>
-                </div><div v-for="(s, i) in player.stored" class="o-slot-div" :class="{choosed: player.choosed_store === i}" @click="chooseStoredSlot(i)">
+                </div><div v-for="(s, i) in player.stored" class="o-slot-div" :class="{chose: player.chose_store === i}" @click="chooseStoredSlot(i)">
                     <div class="o-slot-amount">Stored</div>
                     <div class="o-display-slot">
                         <o-slot :data="{slot: s.base}" ></o-slot>
@@ -84,7 +84,7 @@
                 Choose 3 of rewards!
                 <div><b>Common 75%</b> | <b>Uncommon 18.7%</b> | <b>Rare 5.3%</b> | <b>Epic 0.67%</b> | <b>Legendary 0.33%</b></div>
                 <div class="o-rewards-grid">
-                    <div v-for="([s, k, r], i) in player.rewards" class="o-slot-div" :class="{choosed: player.choosedRewards.has(i)}" :style="{'--primary-color': REWARD_RARITIES[r][1]}" @click="chooseReward(i)">
+                    <div v-for="([s, k, r], i) in player.rewards" class="o-slot-div" :class="{chose: player.choseRewards.has(i)}" :style="{'--primary-color': REWARD_RARITIES[r][1]}" @click="chooseReward(i)">
                         <div class="o-slot-amount">{{ REWARD_RARITIES[r][0] }} x{{ k }}</div>
                         <div class="o-display-slot">
                             <o-slot :data="{slot: s}" ></o-slot>
@@ -94,7 +94,7 @@
                 </div>
                 <i style="font-size: 12px;">If you choose a variable that never existed before, it will give some operator and random constant.</i>
                 <div>
-                    <button onclick="claimRewards()">Claim the choosed rewards (or skip)</button>
+                    <button onclick="claimRewards()">Claim the chose rewards (or skip)</button>
                     <button :class="{locked: player.reroll <= 0}" onclick="rerollRewards()">Reroll ({{ player.reroll }})</button>
                 </div>
             </div><div v-else>

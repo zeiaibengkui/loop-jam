@@ -22,8 +22,8 @@ const getPlayerData = function () {
             // [new Operator(20, new Slot(4, new Constant(3), true)),3]
         ]),
         stored: [],
-        choosed_slot: null,
-        choosed_store: null,
+        chose_slot: null,
+        chose_store: null,
 
         code: [
             new Operator(OperatorType.AddVariable, new Slot(0, new Variable('P'), true)),
@@ -32,7 +32,7 @@ const getPlayerData = function () {
 
         rewards: [],
         reroll: 5,
-        choosedRewards: new Set(),
+        choseRewards: new Set(),
 
         popup: {
             enabled: false,
@@ -108,8 +108,8 @@ function startGame() {
         [new Constant(1), 10],
         */
     ])
-    player.choosed_slot = null;
-    player.choosed_store = null;
+    player.chose_slot = null;
+    player.chose_store = null;
     player.code = [
         new Operator(OperatorType.AddVariable, new Slot(0, new Variable('P'), true)),
     ]
@@ -292,8 +292,8 @@ function splitCode(c, override=true) {
 
         message(``,0)
 
-        player.choosed_slot = null;
-        player.choosed_store = null;
+        player.chose_slot = null;
+        player.chose_store = null;
         player.storing = false;
         player.running = true;
         player.loops++;
@@ -386,7 +386,7 @@ const equalAll = (a,b) => a?.sType === b?.sType && a.equals(b);
 const logBase = (a,b) => Math.log(a) / Math.log(b);
 
 const chooseReward = i => {
-    if (player.choosedRewards.size < 3 || player.choosedRewards.has(i)) player.choosedRewards.has(i) ? player.choosedRewards.delete(i) : player.choosedRewards.add(i);
+    if (player.choseRewards.size < 3 || player.choseRewards.has(i)) player.choseRewards.has(i) ? player.choseRewards.delete(i) : player.choseRewards.add(i);
 };
 
 function message(text, id = 0) {

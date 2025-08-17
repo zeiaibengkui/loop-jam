@@ -66,7 +66,7 @@ function calculateRewards(count = 6) {
 }
 
 function claimRewards(norandom = false) {
-    player.choosedRewards.forEach(x => {
+    player.choseRewards.forEach(x => {
         var r = player.rewards[x]
         increaseSlot(...r)
         r = r[0]
@@ -78,9 +78,9 @@ function claimRewards(norandom = false) {
     })
 
     /*
-    let R = [0,1,2,3,4,5].filter(x => !player.choosedRewards.has(x));
+    let R = [0,1,2,3,4,5].filter(x => !player.choseRewards.has(x));
 
-    if (!norandom) for (let i = 0; i < 3 - player.choosedRewards.size; i++) {
+    if (!norandom) for (let i = 0; i < 3 - player.choseRewards.size; i++) {
         var r = player.rewards[R.splice(Math.floor(Math.random() * R.length),1)[0]]
         increaseSlot(...r)
         r = r[0]
@@ -96,7 +96,7 @@ function claimRewards(norandom = false) {
         if (new Set(['a','b','c','d','e','f']).intersection(player.new_variables).size >= 6) unlockAchievement(3);
     } catch {};
 
-    player.choosedRewards.clear()
+    player.choseRewards.clear()
     player.rewards = []
 
     player.completed = false;
@@ -112,7 +112,7 @@ function rerollRewards(force) {
         player.reroll--;
         ACHIEVEMENT_CONDITIONS[16] = false;
     }
-    player.choosedRewards.clear()
+    player.choseRewards.clear()
 
     player.rewards = calculateRewards()
 }

@@ -35,9 +35,9 @@ function buildVue() {
         computed: {
             objClass() {
                 const d = this.data;
-                const choosed = player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null
+                const chose = player.chose_slot ?? player.stored[player.chose_store]?.node ?? null
                 return {
-                    choosed: !d.locked && (player.storing && d.slot || choosed !== null && !(choosed instanceof Operator && choosed.type === 20)) && (player.storing || d.allowed === 0 || d.allowed & choosed.sType)
+                    chose: !d.locked && (player.storing && d.slot || chose !== null && !(chose instanceof Operator && chose.type === 20)) && (player.storing || d.allowed === 0 || d.allowed & chose.sType)
                 }
             },
             objStyle() {
@@ -58,9 +58,9 @@ function buildVue() {
 
                 if (player.tutorials === 2 || player.tutorials === 4 && d.slot || player.tutorials === 5) return;
 
-                const choosed = player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null
+                const chose = player.chose_slot ?? player.stored[player.chose_store]?.node ?? null
 
-                const condition = !d.locked && (d.allowed === 0 || d.allowed & choosed.sType)
+                const condition = !d.locked && (d.allowed === 0 || d.allowed & chose.sType)
 
                 if (player.storing && !(d.slot instanceof Variable || d.slot instanceof Constant) && !(d.slot instanceof Operator && d.slot.isEmpty())) {
                     if (d.slot && condition) {
@@ -69,26 +69,26 @@ function buildVue() {
 
                         player.storing = false;
                     }
-                } else if (choosed === null) {
+                } else if (chose === null) {
                     if (d.slot && !d.locked) {
                         splitCode(d.slot);
                         d.slot = null;
                     }
-                } else if ((player.slots.get(choosed) > 0 || player.choosed_store !== null) && condition && !(choosed instanceof Operator && choosed.type === 20)) {
-                    if (player.choosed_store !== null) {
-                        player.stored.splice(player.choosed_store, 1);
-                        player.choosed_store = null
-                    } else increaseSlot(choosed,-1)
+                } else if ((player.slots.get(chose) > 0 || player.chose_store !== null) && condition && !(chose instanceof Operator && chose.type === 20)) {
+                    if (player.chose_store !== null) {
+                        player.stored.splice(player.chose_store, 1);
+                        player.chose_store = null
+                    } else increaseSlot(chose,-1)
 
                     if (d.slot) splitCode(d.slot);
 
-                    d.slot = _.cloneDeep(choosed);
+                    d.slot = _.cloneDeep(chose);
 
-                    if (player.slots.get(player.choosed_slot) === 0) player.choosed_slot = null;
+                    if (player.slots.get(player.chose_slot) === 0) player.chose_slot = null;
                 }
 
                 if (player.tutorials === 4) {
-                    player.choosed_slot = null
+                    player.chose_slot = null
                     message(`PERFECT! You can try to run the code (aka loop), pressing the "Play" button.`,2)
                     player.tutorials++
                 }

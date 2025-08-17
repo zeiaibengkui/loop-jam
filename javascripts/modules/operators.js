@@ -263,9 +263,9 @@ class Operator {
             player.tutorials++
         }
 
-        if (player.choosed_store !== null) {
-            player.stored.splice(player.choosed_store, 1);
-            player.choosed_store = null
+        if (player.chose_store !== null) {
+            player.stored.splice(player.chose_store, 1);
+            player.chose_store = null
         }
         else increaseSlot(code,-1)
 
@@ -277,14 +277,14 @@ class Operator {
             player.code.splice(index+1,0,o)
         }
 
-        if (player.slots.get(player.choosed_slot) === 0) player.choosed_slot = null;
+        if (player.slots.get(player.chose_slot) === 0) player.chose_slot = null;
 
         ACHIEVEMENT_CONDITIONS.G5 = false;
         if (player.code.length >= 32) unlockAchievement(11);
     }
     static checkInsert() {
-        const choosed = player.choosed_slot ?? player.stored[player.choosed_store]?.node ?? null
-        return !player.running && choosed instanceof Operator && (choosed.type < 10 || choosed.type === 20)
+        const chose = player.chose_slot ?? player.stored[player.chose_store]?.node ?? null
+        return !player.running && chose instanceof Operator && (chose.type < 10 || chose.type === 20)
     }
 }
 
@@ -303,7 +303,7 @@ function switchStore() {
     if (player.tutorial || player.running || player.completed) return true;
 
     player.storing = !player.storing;
-    player.choosed_slot = null;
+    player.chose_slot = null;
 }
 
 class Store {
@@ -332,8 +332,8 @@ function storeNode(c) {
 function chooseStoredSlot(i) {
     if (player.running) return;
 
-    player.choosed_store = player.choosed_store === i ? null : i;
-    player.choosed_slot = null;
+    player.chose_store = player.chose_store === i ? null : i;
+    player.chose_slot = null;
 }
 
 function chooseInventorySlot(s) {
@@ -352,12 +352,12 @@ function chooseInventorySlot(s) {
     }
 
     player.storing = false;
-    player.choosed_store = null;
+    player.chose_store = null;
 
-    if (player.choosed_slot && equalAll(player.choosed_slot, s)) player.choosed_slot = null
+    if (player.chose_slot && equalAll(player.chose_slot, s)) player.chose_slot = null
     else {
-        player.choosed_slot = null
-        player.choosed_slot = s
+        player.chose_slot = null
+        player.chose_slot = s
     }
 }
 
