@@ -43,14 +43,14 @@ body {
 
     border: none;
     background: var(--primary-color);
-    box-shadow: 1px 1px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
+    /*! box-shadow: 1px 1px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
                 2px 2px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
                 3px 3px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
                 4px 4px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
                 5px 5px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
                 6px 6px 0px color-mix(in srgb, var(--primary-color) 30%, black 70%),
-    inset 0px 0px 0px 1px color-mix(in srgb, var(--primary-color) 40%, black 60%);
-
+    inset 0px 0px 0px 1px color-mix(in srgb, var(--primary-color) 40%, black 60%); */
+    box-shadow: #00000051 2px 2px 3.5px 0.5px;
     margin: 2px;
 }
 
@@ -59,6 +59,7 @@ button {
     padding: 2px 4px;
     font-size: 14px;
     cursor: pointer;
+    border-radius: 100vh;
 }
 button.locked {
     --primary-color: gray;
@@ -94,8 +95,9 @@ h1,h2,h3,h4 {
 .o-slot {
     min-width: 30px;
     min-height: 30px;
-    padding: 3px;
-    margin: 0px 6px 6px 0px;
+    padding: 3px 18px;
+    margin: 3.5px;
+    border-radius: 100vh;
 
     display: flex;
     justify-content: center;
@@ -274,6 +276,11 @@ h1,h2,h3,h4 {
 .o-slot-div:not(:active):hover,
 button:not(.locked, :active):hover {
     transform: scale(1.02);
+}
+
+.o-slot-div,
+button {
+    transition: transform .15s;
 }
 
 .o-display-slot {
@@ -461,7 +468,7 @@ button:not(.locked, :active):hover {
 
 .o-mute-button {
     background-image: url(../textures/sound.png);
-    background-size: contain;
+    background-size: 75%;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -527,6 +534,12 @@ button:not(.locked, :active):hover {
     gap: 10px;
     margin-bottom: 20px;
 }
+.o-menu-buttons > button {    
+    background-position: center;
+    background-size: 75%;
+    background-position:center ;
+    background-repeat: no-repeat;
+}
 .o-tutorial-button {
     min-width: 300px;
     font-size: 20px;
@@ -534,11 +547,9 @@ button:not(.locked, :active):hover {
 }
 .o-start-button {
     background-image: url(../textures/play.png);
-    background-size: contain;
 }
 .o-achievement-button {
     background-image: url(../textures/trophy.png);
-    background-size: contain;
 }
 
 .o-achievements {

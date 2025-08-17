@@ -1,7 +1,9 @@
+
+
 const { createApp, reactive } = Vue
 
 function buildVue() {
-    createApp({
+    const app = createApp({
         setup() {
             return {
                 player,
@@ -19,8 +21,7 @@ function buildVue() {
                 test,
             }
         },
-    })
-    
+    })    
     .component('o-slot',{
         props: {
             data: {
@@ -148,7 +149,8 @@ function buildVue() {
     .provide('OperatorHTMLs',OperatorHTMLs)
     .provide('Operator',Operator)
     .provide('Variable',Variable)
-    .provide('Constant',Constant)
+    .provide('Constant',Constant);
     
-    .mount('#app')
+    app.config.devtools = true;
+    app.mount('#app')
 }
